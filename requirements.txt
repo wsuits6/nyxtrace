@@ -1,6 +1,4 @@
-cat > requirements.txt << 'EOF'
 dnspython==2.6.1
 aiohttp==3.9.5
 rich==13.7.1
 PyYAML==6.0.1
-EOF

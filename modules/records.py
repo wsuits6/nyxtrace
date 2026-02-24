@@ -6,9 +6,9 @@ Enumerates all standard DNS record types.
 import dns.resolver
 import dns.rdatatype
 from typing import Dict, List, Any
-from ..core.config import NyxConfig
-from ..core.target import Target
-from ..core.storage import EvidenceStore
+from core.config import NyxConfig
+from core.target import Target
+from core.storage import EvidenceStore
 
 class RecordsModule:
     RECORD_TYPES = [

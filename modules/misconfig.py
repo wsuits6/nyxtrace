@@ -5,9 +5,9 @@ Detects SPF/DMARC issues, wildcard DNS, open resolvers.
 
 import re
 from typing import Dict, List, Any
-from ..core.config import NyxConfig
-from ..core.target import Target
-from ..core.storage import EvidenceStore
+from core.config import NyxConfig
+from core.target import Target
+from core.storage import EvidenceStore
 
 class MisconfigModule:
     def __init__(self, config: NyxConfig, target: Target, store: EvidenceStore):
