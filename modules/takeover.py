@@ -1,11 +1,17 @@
 """
-Subdomain Takeover Risk Detection Module
+Subdomain Takeover Risk Detection Module (STUB - working version)
 """
 
-TAKEOVER_SERVICES = {
+import dns.resolver
+from typing import Dict, List, Any
+from ..core.config import NyxConfig
+from ..core.target import Target
+from ..core.storage import EvidenceStore
+
+TAKEOVER_FINGERPRINTS = {
     'github': ['github.io.', 'github.map.fastly.net.'],
     'heroku': ['herokuapp.com.'],
-    'aws-s3': ['amazonaws.com.']
+    's3': ['amazonaws.com.']
 }
 
 class TakeoverModule:
@@ -16,24 +22,28 @@ class TakeoverModule:
         self.results = {'module': 'takeover', 'records': [], 'findings': []}
     
     async def run(self) -> Dict[str, Any]:
-        """Detect subdomain takeover risks."""
-        cname_records = await self._get_cname_records()
-        
-        for record in cname_records:
-            for service, fingerprints in TAKEOVER_SERVICES.items():
-                if any(fp in record['data'] for fp in fingerprints):
-                    self._add_finding('takeover_risk', 
-                                    f"Potential {service} takeover: {record['data']}")
+        """Detect takeover risks from CNAME records."""
+        try:
+            resolver = dns.resolver.Resolver()
+            resolver.timeout = 5
+            cnames = resolver.resolve(self.target.fqdn, 'CNAME')
+            
+            for cname in cnames:
+                cname_str = str(cname.target).rstrip('.')
+                for service, fingerprints in TAKEOVER_FINGERPRINTS.items():
+                    if any(fp in cname_str for fp in fingerprints):
+                        self.results['findings'].append({
+                            'type': 'takeover_risk',
+                            'severity': 'critical',
+                            'service': service,
+                            'cname': cname_str
+                        })
+                self.results['records'].append({
+                    'type': 'CNAME',
+                    'target': self.target.fqdn,
+                    'cname': cname_str
+                })
+        except:
+            pass
         
         return self.results
-    
-    async def _get_cname_records(self) -> List[Dict]:
-        # Get CNAME records
-        return []
-    
-    def _add_finding(self, ftype: str, message: str):
-        self.results['findings'].append({
-            'type': ftype,
-            'severity': 'critical',
-            'message': message
-        })
